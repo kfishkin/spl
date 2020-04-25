@@ -10,14 +10,14 @@ import org.jsoup.select.Elements;
  *
  */
 public class BestMatch {
-  public Book desired;
+  public MediaItem desired;
   public String bestTitle;
   public int titleDistance;
   public String bestAuthor;
   public int authorDistance;
   public Format bestFormat;
   
-  public BestMatch(Book desired, String bestTitle, int titleDistance, String bestAuthor,
+  public BestMatch(MediaItem desired, String bestTitle, int titleDistance, String bestAuthor,
       int authorDistance, Format bestFormat) {
     super();
     this.desired = desired;

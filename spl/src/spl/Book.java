@@ -7,10 +7,10 @@ import java.util.ArrayList;
  * @author Ken Fishkin
  *
  */
-public class Book implements Comparable<Book> {
+public class Book implements Comparable<Book>, MediaItem {
   public String author;
   public String title;
-  public Format format;
+  private Format format;
   public String recommender;
   public String rawFormat;
 
@@ -21,6 +21,11 @@ public class Book implements Comparable<Book> {
       answer += " [from " + recommender + "]";
     }
     return answer;
+  }
+  
+  @Override
+  public Format getFormat() {
+    return format;
   }
 
   public Book(String author, String title, String recommender, Format format) {
@@ -53,31 +58,36 @@ public class Book implements Comparable<Book> {
     
   }
   
-  /**
-   * Chooses (k) books from a list of them of unknown size.
-   * could read them all into an array and then shuffle them, but this way it scales to lists
-   * of arbitrary size, and was a standard google interview question :)
-   */
-  public static Iterable<Book> pickK(Iterable<Book> books, int k) {
-    // when you see the i'th value in the stream, it has odds of becoming a winner of k/i
-    // if it becomes a winner, a loser is chosen randomly.
-    ArrayList<Book> winners = new ArrayList<Book>();
-    int i = 0;
-    for (Book book: books) {
-      i++;
-      if (i <= k) { // automatic winner
-        winners.add(book);
-        continue;
-      }
-      double odds = ((double) k) / ((double) i);
-      double roll = Math.random();
-      if (roll < odds) {
-        // we've got a winner. First, pick a loser.....
-        int loserIndex =(int) (Math.random() * winners.size());
-        winners.remove(loserIndex);
-        winners.add(book);
-      }
-    }
-    return winners;
+
+
+  @Override
+  public boolean isRead() {
+    return format.equals(Format.READ);
   }
+
+  @Override
+  public boolean isNew() {
+    return format.equals(Format.UNKNOWN);
+  }
+
+  @Override
+  public boolean wouldBeAnUpgrade(Format current) {
+    return this.format.value > current.value;
+  }
+
+  @Override
+  public boolean isInDesiredFormat() {
+    return format.equals(Format.EBOOK);
+  }
+
+  @Override
+  public String getTitle() {
+    return title;
+  }
+
+  @Override
+  public String getAuthor() {
+    return author;
+  }
+
 }

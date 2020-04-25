@@ -21,11 +21,11 @@ public class Mailer {
    * @param toAddr the 'to' address in the mail
    * @param numChecked how many books were checked
    * @param upgrades the upgrades found, if any
-   * @param subset the lucky subset of available eBooks to recommend in this email
+   * @param winners the lucky subset of available eBooks to recommend in this email
    * @param apiKey the SendGrid API key
    */
-  public static void sendMail(String fromAddr, String toAddr, int numChecked, Map<Book, BestMatch> upgrades,
-      Iterable<Book> subset, String apiKey) {
+  public static void sendMail(String fromAddr, String toAddr, int numChecked, Map<MediaItem, BestMatch> upgrades,
+      Iterable<MediaItem> winners, String apiKey) {
     try {
       SendGrid sg = new SendGrid(apiKey);
       Request request = new Request();
@@ -51,8 +51,8 @@ public class Mailer {
       }
       if (dump) {
         content.append("<ul>");
-        for (Entry<Book, BestMatch> upgrade : upgrades.entrySet()) {
-          content.append("<li><b>" + upgrade.getKey().title + "</b> by " + upgrade.getKey().author +
+        for (Entry<MediaItem, BestMatch> upgrade : upgrades.entrySet()) {
+          content.append("<li><b>" + upgrade.getKey().getTitle() + "</b> by " + upgrade.getKey().getAuthor() +
               " to " + upgrade.getValue().bestFormat + "</li>");          
         }
         content.append("</ul>");
@@ -60,8 +60,8 @@ public class Mailer {
       content.append("</p>");
       content.append("<p>Some from the list of ebooks:</p>");
       content.append("<ul>");
-      for (Book sample: subset) {
-        content.append("<li><b>" + sample.title + "</b> by " + sample.author + "</li>");
+      for (MediaItem sample: winners) {
+        content.append("<li><b>" + sample.getTitle() + "</b> by " + sample.getAuthor() + "</li>");
       }
       content.append("</ul>");
       body.append(",\"content\":[{\"type\":\"text/html\",\"value\": \"" + content.toString() + "\"}]}");

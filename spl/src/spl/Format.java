@@ -14,6 +14,7 @@ public enum Format implements Comparable<Format> {
   NO(1, "", Arrays.asList("NO", "XX")), 
   OTHER(2, "Audiobook",
       Arrays.asList("Audio")), 
+  VIDEO(2, "Video", Arrays.asList("Video")),
   PHYSICAL(3, "Book", Arrays.asList("H", "Book")),
   EBEPUB(4, "",
           Arrays.asList("EBEPUB")),

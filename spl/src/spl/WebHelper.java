@@ -9,6 +9,7 @@ import java.util.Map;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
@@ -17,6 +18,8 @@ import org.jsoup.select.Elements;
  *
  */
 public class WebHelper {
+  private static boolean firstTime = true;
+  
   /**
    * finds the URL to use to ping the web site.
    * @param base the base part of the URL
@@ -46,12 +49,16 @@ public class WebHelper {
    * @param book the desired book
    * @return the list of results
    */
-  public static Elements toResultsList(Book book) {
+  public static Elements findCandidates(Book book) {
     if (book == null) {
       return null;
     }
-    if (book.format.equals(Format.READ)) {
+    if (book.isRead()) {
       return null;
+    }
+    if (firstTime) {
+      slurpNetflix();
+      firstTime = false;
     }
     Map<String, String> queryParams = new HashMap<String, String>();
     queryParams.put("custom_edit", "false");
@@ -75,6 +82,52 @@ public class WebHelper {
         return null;
       }
       Elements resultList = doc.select("div.cp-search-result-item-content");
+      // JSoup recommends waiting a few seconds between pings...
+      final long SLEEP_TIME_MS = 2000;
+      try {
+        Thread.sleep(SLEEP_TIME_MS);
+      } catch (InterruptedException e) {
+      }
       return resultList;
+  }
+
+  private static void slurpNetflix() {
+    Map<String, String> queryParams = new HashMap<String, String>();
+    //queryParams.put("custom_edit", "false");
+    //queryParams.put("suppress", "true");
+    //queryParams.put("f_FORMAT", "EBOOK|BK");
+    //queryParams.put("searchType", "title");
+    // strip subtitle, indicated by a colon:
+    //int idx = book.title.indexOf(':');
+    //String searchTitle = (idx == -1) ? book.title : book.title.substring(0, idx); 
+    //queryParams.put("query", searchTitle);
+    String base = "https://www.finder.com/netflix-movies";
+    String encoded = WebHelper.toURL(base, queryParams);
+    final String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36";
+    Connection connection = Jsoup.connect(encoded)
+        .userAgent(userAgent);
+    Document doc;
+      try {
+        doc = connection.get();
+      } catch (IOException e) {
+        System.err.printf("toResultsList: IO exception %s\n", e.toString());
+        return;
+      }
+      Elements resultList = doc.select("div.ts-table-container");
+      System.out.printf("size1 = %d\n", resultList.size());
+      resultList = resultList.select("table.luna-table");
+      System.out.printf("size2 = %d\n", resultList.size());
+      resultList = resultList.select("tr");
+      System.out.printf("size3 = %d\n", resultList.size());
+      for (Element x : resultList) {
+        Element title = x.selectFirst("td[data-title='Title']");
+        Element year = x.selectFirst("td[data-title='Year of release']");
+        
+        //System.out.println(x);
+        String t1 = title == null ? "NULL" : title.text();
+        String y1 = year == null ? "NULL" : year.text();
+        System.out.printf("\ttitle=[%s], year=[%s]\n", t1, y1);
+      }
+    
   }
 }
