@@ -1,21 +1,22 @@
-SPL - Seattle Public Library catalog scraper.
+SPL - Seattle Public Library or Netflix catalog scraper.
 
-This Java program takes an input file with the books you are interested in, and
-then checks the SPL web site to see which of those books are in the catalog,
-and, if so, in what format.
+This program scrapes a media source against a checklist of desired items to see which ones are available.
+It can run in two "domains": "spl" (in which case it checks a list of desired books against the
+Seattle Public Library web site), or "netflix" (in which case it checks a list of desired movies
+against what's on Netflix).
+
 
 It will also tell you about "near-misses", in case you have a mis-spelling of
 author or title.
 
-Right now, it only does the Seattle library, but it should be straightforwards to 
-extend to any other library system that allows you to search for a particular title,
-and then allows you to scrape the results list and parse it easily.
 
 There's no GUI, you invoke it from the command line, sorry about that.
-A SAMPLE INVOCATION
-  C:> java -jar spl.jar --f books.tdf -apikey SENDGRID_KEY -from the.librarian@gmail.com -to bibliophage@gmail.com 
+A SAMPLE INVOCATION FOR SPL LIBRARY CHECKING
+  C:> java -jar spl.jar -domain spl --f books.tdf -apikey SENDGRID_KEY -from the.librarian@gmail.com -to bibliophage@gmail.com 
   
   The arguments are:
+  "-domain spl". Tells it that you are che checking the Seattle Public Library website for books
+  
   "-f books.tdf". This is the input file with the books you are interested in.
   More on its format later. This file will be updated when the checker is done.
   
@@ -93,6 +94,18 @@ Bogira, Steve:Courtroom 302. eBook20
 This means that I have 253 titles in my file. 8 I have already read, leaving 245 to check.
 No status changes were found.
 Then it picked 2 eBooks as suggestions.
+
+A SAMPLE INVOCATION FOR SPL LIBRARY CHECKING
+C:> java .jar spl.jar --f "my_imdb_watchlist.csv" -domain netflix
+
+"-domain netflix" - tells it you're checking movies against netflix
+"-f <file name>" - this file should be an IMDb CSV export of a list of movies you care about.
+You don't have to use IMDb for this, it can be any CSV file with the title and year in the 6th
+and 11th columns, respectively.
+
+this domain currently doesn't support email sending, it just dumps the list of movies it found
+to console output.
+
 
 Enjoy!
 
