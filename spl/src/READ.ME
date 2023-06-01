@@ -1,0 +1,102 @@
+SPL - Seattle Public Library catalog scraper.
+
+This Java program takes an input file with the books you are interested in, and
+then checks the SPL web site to see which of those books are in the catalog,
+and, if so, in what format.
+
+It will also tell you about "near-misses", in case you have a mis-spelling of
+author or title.
+
+Right now, it only does the Seattle library, but it should be straightforwards to 
+extend to any other library system that allows you to search for a particular title,
+and then allows you to scrape the results list and parse it easily.
+
+There's no GUI, you invoke it from the command line, sorry about that.
+A SAMPLE INVOCATION
+  C:> --f books.tdf -apikey SENDGRID_KEY -from the.librarian@gmail.com -to bibliophage@gmail.com 
+  
+  The arguments are:
+  "-f books.tdf". This is the input file with the books you are interested in.
+  More on its format later. This file will be updated when the checker is done.
+  
+  The program can optionally send an email with the results, as well. If you want to do that,
+  you need three arguments:
+  "-apikey SENDGRID_KEY". The program uses 'sendgrid' to send email. This sends it for free,
+  but you have to register with them and get an API key. You then put that API key here.
+  
+  "-from the.librarian+spl@gmail.com". This specifies what will show in the 'from'
+  line on the email the program sends. This can be any valid email address.
+  
+  "-to bibliophage@gmail.com". This specifies who the email should be sent to.
+  This should be your email address.
+  
+  THE FILE FORMAT
+  The file uses tabs to separate columns. The columns are:
+  1) author
+  2) title
+  3) [optional] who recommended the book
+  4) the current status. Statuses are:
+      ?? - unknown. Put this in when entering a new book.
+      NO - the book isn't in the catalog
+      Book - it's available as a book
+      EBEPUB - it's available as an eBook, but only in EBEPUB format.
+      eBook - it's available as an eBook
+      READ - already read.
+  Any line that starts with '#' is ignored, you can use it for comments.
+  The statuses can end with a two-digit number, I use that for the year the status last changed.
+      
+ For example, here are the first few lines of my input file:
+ # status as of Sat, March 28 2020
+Abrams, Dan	Theodore Roosevelt for the Defense	Asheville Bookstore	eBook19
+Abrams, Dan	Lincoln's Last Trial	Asheville Bookstore	eBook19
+Adkins, Lesley	Empires of the Plain	Book16
+Ascher, Kate	The Way to Go: Moving by Sea, Land, and Air	Book14
+Asher, C.	Never a Lovely So Real	READ20
+Ashdown, Paddy	Game of Spies	Adriel Devanza	No18
+
+
+So "Lincoln's Last Trial" is available in eBook form, and it was recommended to me on a visit to a bookstore in Asheville.
+"Never a Lovely so Real" was read in 2020.
+"Game of Spies" is not in the catalog.
+
+when you run the program, it will chug along, giving you status as it goes, e.g.:
+1: Abrams, Dan:Theodore Roosevelt for the Defense. eBook19 [from Asheville Bookstore]
+2: Abrams, Dan:Lincoln's Last Trial. eBook19 [from Asheville Bookstore]
+	BestMatch: title=Lincoln's Last Trial (0), author=Abrams, Dan (0), format =EBOOK]
+3: Adkins, Lesley:Empires of the Plain. Book16
+4: Ascher, Kate:The Way to Go: Moving by Sea, Land, and Air. H14
+	BestMatch: title=The Way to Go (0), author=Ascher, Kate (0), format =PHYSICAL]
+5: Asher, C.:Never a Lovely So Real. READ20
+6: Ashdown, Paddy:Game of Spies. No18 [from Adriel Devanza]
+	BestMatch: title=The Spy Game (10), author=Warner, Gertrude Chandler (21), format =EBOOK]
+7: Babits, Lawrence:A Devil of a whipping. NO15
+8: Babits, Lawrence:Long, Obstinate and Bloody. NO11
+9: Baldwin, James:The Fire Next Time. READ20 [from https://www.quora.com/profile/Tom-Robinson-110]
+10: Balko, Radley and Carrington, Tucker:The Cadaver King and the Country Dentist. No19 [from Jarred Dunn@Quora]
+	BestMatch: title=The Cadaver King and the Country Dentist (0), author=Balko, Radley (23), format =EBOOK]
+
+Every other book it shows you the Best match it found. For example, for "The Way to Go",
+ it found an exact match as a "physical" book. 
+ For "Game of Spies", by Paddy Ashdown, the closest it found was "The Spy Game" by Gertrude Chandler.
+ More interesting is "The Cadaver King" - there it's showing an exact title match, but the version in
+ the library doesn't have "and Carrington, Tucker" as author. So in this case I should change the
+ input file to remove Tucker Carrington (sorry guy).
+ 
+ Lastly, when it finishes, it will print a little summary, and 2 randomly chosen available eBooks
+ that you might want to check out next:
+ 
+ Done: 253 books read, 245 checked, 0 upgrades
+Here are 2 ebooks from the list:
+Cercas, Javier:The Impostor. eBook20
+Bogira, Steve:Courtroom 302. eBook20
+
+This means that I have 253 titles in my file. 8 I have already read, leaving 245 to check.
+No status changes were found.
+Then it picked 2 eBooks as suggestions.
+
+Enjoy!
+
+ 
+  
+  
+
